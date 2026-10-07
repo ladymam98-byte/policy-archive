@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>도시·주거공간 정책 연구 아카이브</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --emerald: #0f3e36;
+    --emerald-2: #16584c;
+    --emerald-soft: #e3f1ed;
+    --mint: #9fe1cb;
+    --bg: #f3f4f3;
+    --surface: #ffffff;
+    --border: #dcdfdc;
+    --text: #1f2523;
+    --text-2: #56605c;
+    --text-3: #8a938f;
+    --radius: 12px;
+    --cat-renewal-bg: #e1f5ee; --cat-renewal-fg: #085041;
+    --cat-welfare-bg: #faeeda; --cat-welfare-fg: #633806;
+    --cat-gis-bg: #e6f1fb;     --cat-gis-fg: #0c447c;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ---------- Header ---------- */
+  header { background: var(--emerald); color: #fff; }
+  .header-inner {
+    max-width: 1200px; margin: 0 auto; padding: 22px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    width: 44px; height: 44px; border-radius: 10px; background: var(--emerald-2);
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .brand h1 { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  .brand p { margin: 0; font-size: 12px; color: var(--mint); }
+  .stat { font-size: 13px; color: var(--mint); white-space: nowrap; }
+  .stat strong { color: #fff; font-size: 18px; margin-left: 4px; }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    max-width: 1200px; margin: 0 auto; padding: 20px 20px 0;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 10px;
+  }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab {
+    border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+    padding: 7px 16px; border-radius: 999px; font: inherit; font-size: 14px; cursor: pointer;
+    transition: background .15s, color .15s, border-color .15s;
+  }
+  .tab:hover { border-color: var(--emerald); color: var(--emerald); }
+  .tab.active { background: var(--emerald); border-color: var(--emerald); color: #fff; }
+  .search {
+    margin-left: auto; position: relative; flex: 0 1 300px; min-width: 200px;
+  }
+  .search input {
+    width: 100%; padding: 9px 12px 9px 36px; border: 1px solid var(--border);
+    border-radius: 8px; font: inherit; font-size: 14px; background: var(--surface);
+  }
+  .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-3); }
+
+  /* ---------- Layout ---------- */
+  main {
+    max-width: 1200px; margin: 0 auto; padding: 20px;
+    display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; align-items: start;
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--emerald); margin: 0 0 12px; }
+  .result-info { font-size: 13px; color: var(--text-3); font-weight: 400; margin-left: 6px; }
+
+  /* ---------- Cards ---------- */
+  .feed { display: flex; flex-direction: column; gap: 12px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; transition: border-color .15s, transform .15s;
+  }
+  .card:hover { border-color: var(--emerald-2); }
+  .card.new { animation: pop .45s ease-out; border-color: var(--emerald); }
+  @keyframes pop { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  .card-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .badge { font-size: 12px; padding: 2px 10px; border-radius: 6px; font-weight: 500; }
+  .badge[data-cat="도시재생"] { background: var(--cat-renewal-bg); color: var(--cat-renewal-fg); }
+  .badge[data-cat="주거복지"] { background: var(--cat-welfare-bg); color: var(--cat-welfare-fg); }
+  .badge[data-cat="공간·GIS"] { background: var(--cat-gis-bg); color: var(--cat-gis-fg); }
+  .status { font-size: 11px; color: var(--text-3); }
+  .status.sending { color: #854f0b; }
+  .status.failed { color: #a32d2d; }
+  .card h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; letter-spacing: -0.2px; }
+  .card p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .card .meta { margin-top: 10px; font-size: 12px; color: var(--text-3); }
+  mark { background: #fde68a; color: inherit; padding: 0 1px; border-radius: 2px; }
+  .empty {
+    background: var(--surface); border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 40px 20px; text-align: center; color: var(--text-3); font-size: 14px;
+  }
+
+  /* ---------- Form ---------- */
+  .form-panel {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; position: sticky; top: 20px;
+  }
+  .form-panel h2 { margin: 0 0 4px; font-size: 17px; color: var(--emerald); }
+  .form-panel .hint { margin: 0 0 16px; font-size: 13px; color: var(--text-3); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 5px; font-weight: 500; }
+  .field label .req { color: #a32d2d; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+    font: inherit; font-size: 14px; background: #fafbfa; color: var(--text);
+  }
+  .field textarea { min-height: 120px; resize: vertical; }
+  .field input:focus, .field select:focus, .field textarea:focus, .search input:focus {
+    outline: none; border-color: var(--emerald); box-shadow: 0 0 0 3px rgba(15, 62, 54, .12); background: #fff;
+  }
+  .field .err { display: none; font-size: 12px; color: #a32d2d; margin-top: 4px; }
+  .field.invalid input, .field.invalid select, .field.invalid textarea { border-color: #a32d2d; }
+  .field.invalid .err { display: block; }
+  .submit {
+    width: 100%; padding: 11px; border: 0; border-radius: 8px; background: var(--emerald); color: #fff;
+    font: inherit; font-size: 15px; font-weight: 500; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px; transition: background .15s;
+  }
+  .submit:hover { background: var(--emerald-2); }
+  .submit:disabled { background: #6f8a84; cursor: progress; }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff;
+    border-radius: 50%; animation: spin .7s linear infinite; display: none;
+  }
+  .submit.loading .spinner { display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .form-note { margin: 10px 0 0; font-size: 12px; color: var(--text-3); text-align: center; }
+  .demo-flag {
+    font-size: 12px; background: #faeeda; color: #633806; border-radius: 8px; padding: 8px 10px; margin-bottom: 14px;
+  }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(10, 25, 22, .45);
+    display: none; align-items: center; justify-content: center; padding: 16px; z-index: 50;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: #fff; border-radius: 14px; padding: 26px 24px 20px; width: 100%; max-width: 360px; text-align: center;
+    animation: pop .25s ease-out;
+  }
+  .modal-icon {
+    width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 12px; display: grid; place-items: center;
+    background: var(--emerald-soft); color: var(--emerald);
+  }
+  .modal.error .modal-icon { background: #fcebeb; color: #a32d2d; }
+  .modal h3 { margin: 0 0 6px; font-size: 18px; }
+  .modal p { margin: 0 0 18px; font-size: 14px; color: var(--text-2); }
+  .modal button {
+    border: 0; background: var(--emerald); color: #fff; font: inherit; font-size: 14px;
+    padding: 9px 28px; border-radius: 8px; cursor: pointer;
+  }
+
+  footer { text-align: center; font-size: 12px; color: var(--text-3); padding: 10px 20px 30px; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; padding: 16px; }
+    .toolbar { padding: 16px 16px 0; }
+    .header-inner { padding: 18px 16px; }
+    .search { margin-left: 0; flex: 1 1 100%; }
+    .form-panel { position: static; order: -1; }
+  }
+  @media (max-width: 480px) {
+    .brand h1 { font-size: 17px; }
+    .stat { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#9fe1cb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V8l7-4 7 4v13M9 21v-6h6v6M9 10h.01M15 10h.01"/></svg>
+      </div>
+      <div>
+        <h1>도시·주거공간 정책 연구 아카이브</h1>
+        <p>Urban &amp; Housing Policy Research Archive</p>
+      </div>
+    </div>
+    <div class="stat">전체 자료<strong id="totalCount">0</strong>건</div>
+  </div>
+</header>
+
+<div class="toolbar">
+  <nav class="tabs" role="tablist" aria-label="카테고리">
+    <button class="tab active" role="tab" data-cat="전체" aria-selected="true">전체</button>
+    <button class="tab" role="tab" data-cat="도시재생" aria-selected="false">도시재생</button>
+    <button class="tab" role="tab" data-cat="주거복지" aria-selected="false">주거복지</button>
+    <button class="tab" role="tab" data-cat="공간·GIS" aria-selected="false">공간·GIS</button>
+  </nav>
+  <div class="search">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="searchInput" type="search" placeholder="제목·본문 검색" aria-label="제목 및 본문 검색" />
+  </div>
+</div>
+
+<main>
+  <!-- 좌측: 자료 목록 -->
+  <section aria-labelledby="feedTitle">
+    <h2 class="section-title" id="feedTitle">연구 자료 목록<span class="result-info" id="resultInfo"></span></h2>
+    <div class="feed" id="feed"></div>
+  </section>
+
+  <!-- 우측: 기고 폼 -->
+  <aside class="form-panel" aria-labelledby="formTitle">
+    <h2 id="formTitle">연구 기고하기</h2>
+    <p class="hint">제출된 기고는 구글 스프레드시트에 아카이빙됩니다.</p>
+    <div class="demo-flag" id="demoFlag" hidden>
+      데모 모드: <code>GAS_URL</code>이 비어 있어 실제 전송 없이 화면에만 추가됩니다.
+    </div>
+    <form id="submitForm" novalidate>
+      <div class="field">
+        <label for="title">제목 <span class="req">*</span></label>
+        <input id="title" name="title" type="text" maxlength="120" placeholder="노후 주거지 정비 모델 비교 연구" />
+        <div class="err">제목을 입력하세요.</div>
+      </div>
+      <div class="field">
+        <label for="category">카테고리 <span class="req">*</span></label>
+        <select id="category" name="category">
+          <option value="">선택하세요</option>
+          <option value="도시재생">도시재생</option>
+          <option value="주거복지">주거복지</option>
+          <option value="공간·GIS">공간·GIS</option>
+        </select>
+        <div class="err">카테고리를 선택하세요.</div>
+      </div>
+      <div class="field">
+        <label for="author">작성자 <span class="req">*</span></label>
+        <input id="author" name="author" type="text" maxlength="40" placeholder="홍길동 (○○연구원)" />
+        <div class="err">작성자를 입력하세요.</div>
+      </div>
+      <div class="field">
+        <label for="email">이메일</label>
+        <input id="email" name="email" type="email" placeholder="name@example.com" />
+        <div class="err">올바른 이메일 형식이 아닙니다.</div>
+      </div>
+      <div class="field">
+        <label for="content">본문 요약 <span class="req">*</span></label>
+        <textarea id="content" name="content" maxlength="2000" placeholder="연구 배경, 방법, 주요 시사점을 요약해 주세요."></textarea>
+        <div class="err">본문을 10자 이상 입력하세요.</div>
+      </div>
+      <button type="submit" class="submit" id="submitBtn">
+        <span class="spinner" aria-hidden="true"></span>
+        <span class="label">기고 제출</span>
+      </button>
+      <p class="form-note">* 표시는 필수 항목입니다.</p>
+    </form>
+  </aside>
+</main>
+
+<footer>© 2026 도시·주거공간 정책 연구 아카이브</footer>
+
+<div class="modal-backdrop" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" id="modalBox">
+    <div class="modal-icon" id="modalIcon"></div>
+    <h3 id="modalTitle"></h3>
+    <p id="modalMsg"></p>
+    <button type="button" id="modalClose">확인</button>
+  </div>
+</div>
+
+<script>
+  /* =========================================================
+     설정: 구글 앱스 스크립트 웹앱 배포 URL을 붙여넣으세요.
+     예) https://script.google.com/macros/s/AKfy.../exec
+     비워두면 데모 모드로 동작합니다.
+     ========================================================= */
+  const GAS_URL = "";
+
+  const SEED = [
+    { id: "s1", category: "도시재생", title: "노후 원도심 상권 활성화와 거점시설 연계 전략",
+      content: "도시재생 뉴딜 사업지 12곳의 거점시설 이용 실태를 분석하고, 주변 상권 매출 변화와의 상관관계를 검토했다. 운영 주체의 지속가능성 확보가 핵심 과제로 나타났다.",
+      author: "김연구", date: "2026-10-02" },
+    { id: "s2", category: "주거복지", title: "청년 공공임대 주거비 부담 완화 효과 분석",
+      content: "수도권 행복주택 입주자 설문을 바탕으로 소득 대비 임대료 비율(RIR)의 변화를 추정했다. 입주 후 평균 RIR이 9.4%p 감소한 것으로 나타났다.",
+      author: "박정책", date: "2026-09-27" },
+    { id: "s3", category: "공간·GIS", title: "GIS 기반 생활SOC 접근성 격차 지도화",
+      content: "15분 도시 관점에서 읍면동 단위 보행 네트워크 접근성을 산출하고, 도서관·체육시설·돌봄시설의 공간적 사각지대를 시각화했다.",
+      author: "이공간", date: "2026-09-20" },
+    { id: "s4", category: "도시재생", title: "주민참여형 도시재생 거버넌스의 지속성 요인",
+      content: "현장지원센터 종료 이후 주민협의체가 존속한 사례를 비교해 재정 자립, 리더십 승계, 행정 파트너십을 핵심 요인으로 도출했다.",
+      author: "최협치", date: "2026-09-11" },
+    { id: "s5", category: "주거복지", title: "고령 1인 가구 주거 안전망 개선 방향",
+      content: "주거급여 수급 고령 1인 가구의 주거 상태를 분석해 무장애 리모델링과 돌봄 연계형 주택 공급 확대 필요성을 제시한다.",
+      author: "정복지", date: "2026-08-30" },
+    { id: "s6", category: "공간·GIS", title: "위성영상을 활용한 도시 열섬 취약지역 판별",
+      content: "Landsat 지표면 온도와 녹지율, 건축물 밀도를 결합해 폭염 취약 지역을 판별하고 쿨루프·가로수 우선 설치 지역을 제안했다.",
+      author: "한위성", date: "2026-08-18" }
+  ];
+
+  const state = { items: [...SEED], category: "전체", query: "" };
+
+  const $ = (sel) => document.querySelector(sel);
+  const feed = $("#feed");
+  const form = $("#submitForm");
+  const submitBtn = $("#submitBtn");
+
+  if (!GAS_URL) $("#demoFlag").hidden = false;
+
+  /* ---------- 렌더링 ---------- */
+  const escapeHTML = (s) => String(s ?? "").replace(/[&<>"']/g, (c) =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+  const escapeRegExp = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+  function highlight(text, query) {
+    const safe = escapeHTML(text);
+    if (!query) return safe;
+    const re = new RegExp(escapeRegExp(escapeHTML(query)), "gi");
+    return safe.replace(re, (m) => `<mark>${m}</mark>`);
+  }
+
+  function truncate(text, n = 140) {
+    return text.length > n ? text.slice(0, n) + "…" : text;
+  }
+
+  const STATUS_LABEL = { sending: "전송 중…", failed: "전송 실패", sent: "방금 등록됨" };
+
+  function cardHTML(item, query) {
+    const status = item._status
+      ? `<span class="status ${item._status}">${STATUS_LABEL[item._status]}</span>` : "";
+    return `
+      <article class="card${item._new ? " new" : ""}" data-id="${escapeHTML(item.id)}">
+        <div class="card-top">
+          <span class="badge" data-cat="${escapeHTML(item.category)}">${escapeHTML(item.category)}</span>
+          ${status}
+        </div>
+        <h3>${highlight(item.title, query)}</h3>
+        <p>${highlight(truncate(item.content), query)}</p>
+        <div class="meta">${escapeHTML(item.author)} · ${escapeHTML(item.date.replace(/-/g, "."))}</div>
+      </article>`;
+  }
+
+  function render() {
+    const q = state.query.trim().toLowerCase();
+    const list = state.items.filter((it) => {
+      const catOK = state.category === "전체" || it.category === state.category;
+      const qOK = !q || it.title.toLowerCase().includes(q) || it.content.toLowerCase().includes(q);
+      return catOK && qOK;
+    });
+
+    feed.innerHTML = list.length
+      ? list.map((it) => cardHTML(it, state.query.trim())).join("")
+      : `<div class="empty">조건에 맞는 자료가 없습니다.<br/>다른 검색어나 카테고리를 선택해 보세요.</div>`;
+
+    $("#totalCount").textContent = state.items.length;
+    $("#resultInfo").textContent = `${list.length}건`;
+    state.items.forEach((it) => delete it._new);
+  }
+
+  /* ---------- 필터 ---------- */
+  document.querySelectorAll(".tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".tab").forEach((t) => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      state.category = tab.dataset.cat;
+      render();
+    });
+  });
+
+  $("#searchInput").addEventListener("input", (e) => {
+    state.query = e.target.value;
+    render();
+  });
+
+  /* ---------- 유효성 검사 ---------- */
+  function validate(data) {
+    const rules = {
+      title: data.title.length > 0,
+      category: data.category.length > 0,
+      author: data.author.length > 0,
+      email: !data.email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email),
+      content: data.content.length >= 10
+    };
+    let ok = true;
+    Object.entries(rules).forEach(([name, valid]) => {
+      form.elements[name].closest(".field").classList.toggle("invalid", !valid);
+      if (!valid) ok = false;
+    });
+    if (!ok) form.querySelector(".field.invalid input, .field.invalid select, .field.invalid textarea")?.focus();
+    return ok;
+  }
+
+  form.addEventListener("input", (e) => {
+    e.target.closest(".field")?.classList.remove("invalid");
+  });
+
+  /* ---------- 모달 ---------- */
+  const ICON_OK = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5L20 7"/></svg>';
+  const ICON_ERR = '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 8v5M12 16h.01"/><circle cx="12" cy="12" r="9"/></svg>';
+
+  function showModal(ok, title, msg) {
+    $("#modalBox").classList.toggle("error", !ok);
+    $("#modalIcon").innerHTML = ok ? ICON_OK : ICON_ERR;
+    $("#modalTitle").textContent = title;
+    $("#modalMsg").textContent = msg;
+    $("#modal").classList.add("show");
+    $("#modalClose").focus();
+  }
+  const closeModal = () => $("#modal").classList.remove("show");
+  $("#modalClose").addEventListener("click", closeModal);
+  $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
+
+  /* ---------- 버튼 로딩 상태 ---------- */
+  function setLoading(on) {
+    submitBtn.disabled = on;
+    submitBtn.classList.toggle("loading", on);
+    submitBtn.querySelector(".label").textContent = on ? "전송 중…" : "기고 제출";
+  }
+
+  /* ---------- GAS 전송 ---------- */
+  async function sendToGAS(payload) {
+    if (!GAS_URL) {
+      await new Promise((r) => setTimeout(r, 900)); // 데모 모드: 네트워크 지연 흉내
+      return;
+    }
+    // no-cors 모드에서는 'text/plain'만 허용되므로 JSON 문자열을 text/plain으로 보냅니다.
+    // 응답은 opaque라 내용을 읽을 수 없으며, 네트워크 오류일 때만 예외가 발생합니다.
+    await fetch(GAS_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+  }
+
+  /* ---------- 제출 ---------- */
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const fd = new FormData(form);
+    const data = Object.fromEntries([...fd.entries()].map(([k, v]) => [k, String(v).trim()]));
+    if (!validate(data)) return;
+
+    const now = new Date();
+    const payload = {
+      ...data,
+      id: "u" + now.getTime(),
+      date: now.toISOString().slice(0, 10),
+      submittedAt: now.toISOString()
+    };
+
+    // 낙관적 UI: 응답을 기다리지 않고 피드 맨 위에 카드를 먼저 추가
+    const optimistic = { ...payload, _status: "sending", _new: true };
+    state.items.unshift(optimistic);
+    if (state.category !== "전체" && state.category !== payload.category) {
+      document.querySelector('.tab[data-cat="전체"]').click();
+    } else {
+      render();
+    }
+
+    setLoading(true);
+    try {
+      await sendToGAS(payload);
+      optimistic._status = "sent";
+      render();
+      form.reset();
+      showModal(true, "기고가 접수되었습니다",
+        GAS_URL ? "구글 스프레드시트에 아카이빙되었습니다." : "데모 모드라 화면에만 추가되었습니다.");
+      setTimeout(() => { delete optimistic._status; render(); }, 4000);
+    } catch (err) {
+      optimistic._status = "failed";
+      render();
+      showModal(false, "전송에 실패했습니다", "네트워크 연결을 확인한 뒤 다시 시도해 주세요.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  /* ---------- 시트에 저장된 기고 불러오기 (doGet) ---------- */
+  async function loadFromSheet() {
+    if (!GAS_URL) return;
+    try {
+      const res = await fetch(GAS_URL);
+      const rows = await res.json();
+      if (!Array.isArray(rows)) return;
+      const known = new Set(state.items.map((it) => it.id));
+      const fresh = rows
+        .filter((r) => r && r.title && !known.has(r.id))
+        .map((r) => ({
+          id: String(r.id), category: r.category, title: r.title,
+          content: r.content || "", author: r.author || "익명", date: String(r.date || "").slice(0, 10)
+        }));
+      state.items = [...fresh, ...state.items].sort((a, b) => b.date.localeCompare(a.date));
+      render();
+    } catch (err) {
+      console.warn("시트 데이터를 불러오지 못했습니다.", err);
+    }
+  }
+
+  render();
+  loadFromSheet();
+</script>
+</body>
+</html>
